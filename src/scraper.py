@@ -124,3 +124,42 @@ def download_omie_range_v2(start_date: str, end_date: str) -> pd.DataFrame:
     file_name = f"omie_{start_date}_{end_date}.csv"
     df_final.to_csv(os.path.join(raw_dir, file_name), index=False)
     return df_final
+
+
+######################### Datos de open-meteo ####################################
+
+
+def download_openmeteo(lat, lon, start_date, end_date, location_name):
+    """
+    Descarga datos meteorológicos horarios de Open-Meteo.
+    Variables: temperatura, irradiación solar, velocidad de viento
+    """
+    url = "https://archive-api.open-meteo.com/v1/archive"
+    
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "start_date": start_date,
+        "end_date": end_date,
+        "hourly": "temperature_2m,shortwave_radiation,windspeed_10m",
+        "timezone": "Europe/Madrid"
+    }
+    
+    response = requests.get(url, params=params)
+    
+    if response.status_code != 200:
+        raise Exception(f"Error {response.status_code} para {location_name}")
+    
+    data = response.json()
+    
+    df = pd.DataFrame({
+        "datetime": data["hourly"]["time"],
+        "temperature": data["hourly"]["temperature_2m"],
+        "solar_radiation": data["hourly"]["shortwave_radiation"],
+        "wind_speed": data["hourly"]["windspeed_10m"],
+        "location": location_name
+    })
+    
+    df["datetime"] = pd.to_datetime(df["datetime"])
+    
+    return df
