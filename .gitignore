@@ -1,0 +1,9 @@
+data/raw/
+data/processed/
+models/
+__pycache__/
+.ipynb_checkpoints/
+*.pkl
+data/electricity.db
+data/raw/
+outputs/
